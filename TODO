@@ -1,0 +1,7 @@
+- Update Account
+	- Request: id and name in json
+	- Response: err
+
+- List Account
+	- Request: none
+	- Response: array of model.Account, err
