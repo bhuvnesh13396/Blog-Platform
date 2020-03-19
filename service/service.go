@@ -9,11 +9,13 @@ import (
 
 var (
 	errInvalidArgument = errors.New("invalid argument")
+	errInvalidId       = errors.New("No such account exists with given Id")
 )
 
 type Service interface {
 	GetAccount(ctx context.Context, id string) (account model.Account, err error)
 	AddAccount(ctx context.Context, id string, name string) (err error)
+	UpdateAccount(ctx context.Context, id string, name string) (err error)
 }
 
 type service struct {
@@ -41,9 +43,25 @@ func (s *service) AddAccount(ctx context.Context, id string, name string) (err e
 	}
 
 	acc := model.Account{
-		ID: id,
+		ID:   id,
 		Name: name,
 	}
 
 	return s.accountRepo.Add(acc)
+}
+
+func (s *service) UpdateAccount(ctx context.Context, id string, name string) (err error) {
+	if len(id) < 1 || len(name) < 1 {
+		err = errInvalidArgument
+		return
+	}
+
+	acc, err := s.accountRepo.Get(id)
+	if err != nil {
+		err = errInvalidId
+		return
+	}
+
+	return s.accountRepo.Update(acc, name)
+
 }

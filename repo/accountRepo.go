@@ -40,3 +40,12 @@ func (repo *accountRepo) Get(instanceDomain string) (a model.Account, err error)
 
 	return
 }
+
+func (repo *accountRepo) Update(a model.Account, name string) (err error) {
+	data, err := json.Marshal(a)
+	if err != nil {
+		return
+	}
+	err = repo.db.Set(a.ID, data)
+	return
+}

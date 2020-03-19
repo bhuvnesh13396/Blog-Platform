@@ -47,8 +47,21 @@ func NewHandler(s Service) http.Handler {
 		writeResp(w, nil, err)
 	}
 
+	updateAccount := func(w http.ResponseWriter, req *http.Request) {
+		var addReq AddReq
+		err := json.NewDecoder(req.Body).Decode(&addReq)
+		if err != nil {
+			writeResp(w, nil, err)
+			return
+		}
+
+		err = s.UpdateAccount(ctx, addReq.ID, addReq.Name)
+		writeResp(w, nil, err)
+	}
+
 	r.HandleFunc("/account/{id}", getAccount).Methods(http.MethodGet)
 	r.HandleFunc("/account", addAccount).Methods(http.MethodPost)
+	r.HandleFunc("/account/{id}", updateAccount).Methods(http.MethodPut)
 
 	return r
 }

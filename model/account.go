@@ -16,4 +16,5 @@ type Account struct {
 type AccountRepo interface {
 	Add(acc Account) (err error)
 	Get(id string) (account Account, err error)
+	Update(acc Account, newValue string) (err error)
 }
