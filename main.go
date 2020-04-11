@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"math/rand"
@@ -8,9 +9,10 @@ import (
 	"os"
 	"time"
 
-	"sample/kv"
-	"sample/repo"
 	"sample/service"
+	"sample/repo/psql"
+
+	_ "github.com/lib/pq"
 )
 
 func init() {
@@ -23,11 +25,13 @@ func errExit(err error) {
 }
 
 func main() {
-	accountDB, err := kv.NewDatabse("account")
+	connStr := "user=test password=qweqwe dbname=blog"
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		errExit(err)
+		log.Fatal(err)
 	}
-	accountRepo := repo.NewAccountRepo(accountDB)
+
+	accountRepo := psql.NewAccountRepo(db)
 
 	s := service.NewService(accountRepo)
 	handler := service.NewHandler(s)
