@@ -56,12 +56,6 @@ func (s *service) UpdateAccount(ctx context.Context, id string, name string) (er
 		return
 	}
 
-	acc, err := s.accountRepo.Get(id)
-	if err != nil {
-		err = errInvalidId
-		return
-	}
-
-	return s.accountRepo.Update(acc, name)
+	return s.accountRepo.Update(id, name)
 
 }

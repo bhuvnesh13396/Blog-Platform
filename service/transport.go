@@ -48,20 +48,20 @@ func NewHandler(s Service) http.Handler {
 	}
 
 	updateAccount := func(w http.ResponseWriter, req *http.Request) {
-		var addReq AddReq
-		err := json.NewDecoder(req.Body).Decode(&addReq)
+		var updateReq UpdateReq
+		err := json.NewDecoder(req.Body).Decode(&updateReq)
 		if err != nil {
 			writeResp(w, nil, err)
 			return
 		}
 
-		err = s.UpdateAccount(ctx, addReq.ID, addReq.Name)
+		err = s.UpdateAccount(ctx, updateReq.ID, updateReq.Name)
 		writeResp(w, nil, err)
 	}
 
 	r.HandleFunc("/account/{id}", getAccount).Methods(http.MethodGet)
 	r.HandleFunc("/account", addAccount).Methods(http.MethodPost)
-	r.HandleFunc("/account/{id}", updateAccount).Methods(http.MethodPut)
+	r.HandleFunc("/account", updateAccount).Methods(http.MethodPut)
 
 	return r
 }
