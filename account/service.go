@@ -1,10 +1,10 @@
-package service
+package account
 
 import (
 	"context"
 	"errors"
 
-	"sample/account/model"
+	"sample/model"
 )
 
 var (

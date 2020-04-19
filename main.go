@@ -9,10 +9,9 @@ import (
 	"os"
 	"time"
 
-	accountPSQLPackage "sample/account/repo/psql"
-	accountSerivePackage "sample/account/service"
-	articlePSQLPackage "sample/article/repo/psql"
-	articleServicePackage "sample/article/service"
+	"sample/account"
+	"sample/article"
+	"sample/repo/psql"
 
 	_ "github.com/lib/pq"
 )
@@ -33,14 +32,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	accountRepo := accountPSQLPackage.NewAccountRepo(db)
-	articleRepo := articlePSQLPackage.NewArticleRepo(db)
+	accountRepo := psql.NewAccountRepo(db)
+	articleRepo := psql.NewArticleRepo(db)
 
-	accountService := accountSerivePackage.NewService(accountRepo)
-	accountHandler := accountSerivePackage.NewHandler(accountService)
+	accountService := account.NewService(accountRepo)
+	accountHandler := account.NewHandler(accountService)
 
-	articleService := articleServicePackage.NewService(articleRepo)
-	articleHandler := articleServicePackage.NewHandler(articleService)
+	articleService := article.NewService(articleRepo)
+	articleHandler := article.NewHandler(articleService)
 
 	r := http.NewServeMux()
 

@@ -1,4 +1,4 @@
-package service
+package article
 
 type AddReq struct {
 	ID          string `json:"id"`

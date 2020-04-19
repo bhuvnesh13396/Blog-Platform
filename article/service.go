@@ -1,9 +1,10 @@
-package service
+package article
 
 import (
 	"context"
 	"errors"
-	"sample/article/model"
+
+	"sample/model"
 )
 
 var (

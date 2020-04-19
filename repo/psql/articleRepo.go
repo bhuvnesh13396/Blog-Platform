@@ -2,7 +2,8 @@ package psql
 
 import (
 	"database/sql"
-	"sample/article/model"
+
+	"sample/model"
 )
 
 type articleRepo struct {
