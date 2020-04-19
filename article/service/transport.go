@@ -29,25 +29,24 @@ func writeResp(w http.ResponseWriter, data interface{}, err error) {
 
 func NewHandler(s Service) http.Handler {
 	r := mux.NewRouter()
-
-	getAccount := func(w http.ResponseWriter, req *http.Request) {
+	getArticle := func(w http.ResponseWriter, req *http.Request) {
 		id, _ := mux.Vars(req)["id"]
-		a, err := s.GetAccount(ctx, id)
+		a, err := s.GetArticle(ctx, id)
 		writeResp(w, a, err)
 	}
 
-	addAccount := func(w http.ResponseWriter, req *http.Request) {
+	addArticle := func(w http.ResponseWriter, req *http.Request) {
 		var addReq AddReq
 		err := json.NewDecoder(req.Body).Decode(&addReq)
 		if err != nil {
 			writeResp(w, nil, err)
 			return
 		}
-		err = s.AddAccount(ctx, addReq.ID, addReq.Name)
+		err = s.AddArticle(ctx, addReq.ID, addReq.Title, addReq.Description)
 		writeResp(w, nil, err)
 	}
 
-	updateAccount := func(w http.ResponseWriter, req *http.Request) {
+	updateArticle := func(w http.ResponseWriter, req *http.Request) {
 		var updateReq UpdateReq
 		err := json.NewDecoder(req.Body).Decode(&updateReq)
 		if err != nil {
@@ -55,13 +54,12 @@ func NewHandler(s Service) http.Handler {
 			return
 		}
 
-		err = s.UpdateAccount(ctx, updateReq.ID, updateReq.Name)
+		err = s.UpdateArticle(ctx, updateReq.ID, updateReq.Title)
 		writeResp(w, nil, err)
 	}
 
-	r.HandleFunc("/account/{id}", getAccount).Methods(http.MethodGet)
-	r.HandleFunc("/account", addAccount).Methods(http.MethodPost)
-	r.HandleFunc("/account", updateAccount).Methods(http.MethodPut)
-
+	r.HandleFunc("/article", addArticle).Methods(http.MethodPost)
+	r.HandleFunc("/article", updateArticle).Methods(http.MethodPut)
+	r.HandleFunc("/article/{id}", getArticle).Methods(http.MethodGet)
 	return r
 }
