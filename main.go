@@ -14,7 +14,6 @@ import (
 	articlePSQLPackage "sample/article/repo/psql"
 	articleServicePackage "sample/article/service"
 
-	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
 
@@ -43,7 +42,8 @@ func main() {
 	articleService := articleServicePackage.NewService(articleRepo)
 	articleHandler := articleServicePackage.NewHandler(articleService)
 
-	r := mux.NewRouter()
+	r := http.NewServeMux()
+
 	r.Handle("/article", articleHandler)
 	r.Handle("/article/", articleHandler)
 	r.Handle("/account", accountHandler)
