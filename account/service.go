@@ -9,7 +9,6 @@ import (
 
 var (
 	errInvalidArgument = errors.New("invalid argument")
-	errInvalidId       = errors.New("No such account exists with given Id")
 )
 
 type Service interface {

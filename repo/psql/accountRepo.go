@@ -10,10 +10,16 @@ type accountRepo struct {
 	db *sql.DB
 }
 
-func NewAccountRepo(db *sql.DB) *accountRepo {
+func NewAccountRepo(db *sql.DB) (*accountRepo, error) {
+	query := "CREATE TABLE IF NOT EXISTS account (id varchar primary key, name varchar)"
+	_, err := db.Exec(query)
+	if err != nil {
+		return nil, err
+	}
+
 	return &accountRepo{
 		db: db,
-	}
+	}, nil
 }
 
 func (repo *accountRepo) Add(a model.Account) (err error) {

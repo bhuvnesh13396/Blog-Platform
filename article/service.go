@@ -2,51 +2,70 @@ package article
 
 import (
 	"context"
-	"errors"
 
+	"sample/common/err"
 	"sample/model"
 )
 
 var (
-	errInvalidArgument = errors.New("invalid argument")
-	errInvalidId       = errors.New("No such article exists")
+	errInvalidArgument = err.New(101, "invalid argument")
 )
 
 type Service interface {
-	GetArticle(ctx context.Context, id string) (article model.Article, err error)
-	AddArticle(ctx context.Context, id string, title string, description string) (err error)
+	GetArticle(ctx context.Context, id string) (article GetRes, err error)
+	AddArticle(ctx context.Context, id string, userID string, title string, description string) (err error)
 	UpdateArticle(ctx context.Context, id string, title string) (err error)
 	//GetAllArticle(ctx context.Context) (err error)
 }
 
 type service struct {
 	articleRepo model.ArticleRepo
+	accountRepo model.AccountRepo
 }
 
-func NewService(articleRepo model.ArticleRepo) Service {
+func NewService(articleRepo model.ArticleRepo, accountRepo model.AccountRepo) Service {
 	return &service{
 		articleRepo: articleRepo,
+		accountRepo: accountRepo,
 	}
 }
 
-func (s *service) GetArticle(ctx context.Context, id string) (article model.Article, err error) {
+func (s *service) GetArticle(ctx context.Context, id string) (article GetRes, err error) {
 	if len(id) < 1 {
 		err = errInvalidArgument
 		return
 	}
-	return s.articleRepo.Get(id)
-}
 
-func (s *service) AddArticle(ctx context.Context, id string, title string, description string) (err error) {
-	if len(id) < 1 || len(title) < 1 || len(description) < 1 {
-		err = errInvalidArgument
+	a, err := s.articleRepo.Get(id)
+	if err != nil {
 		return
 	}
 
+	u, err := s.accountRepo.Get(a.UserID)
+	if err != nil {
+		return
+	}
+
+	article = GetRes{
+		ID:          a.ID,
+		Title:       a.Title,
+		Description: a.Description,
+		User:        u,
+	}
+
+	return
+}
+
+func (s *service) AddArticle(ctx context.Context, id string, userID string, title string, description string) (err error) {
 	article := model.Article{
 		ID:          id,
 		Title:       title,
+		UserID:      userID,
 		Description: description,
+	}
+
+	if !article.IsValid() {
+		return errInvalidArgument
 	}
 
 	return s.articleRepo.Add(article)

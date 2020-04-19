@@ -31,7 +31,7 @@ func NewHandler(s Service) http.Handler {
 			resp.WriteResp(w, nil, err)
 			return
 		}
-		err = s.AddArticle(ctx, addReq.ID, addReq.Title, addReq.Description)
+		err = s.AddArticle(ctx, addReq.ID, addReq.UserID, addReq.Title, addReq.Description)
 		resp.WriteResp(w, nil, err)
 	}
 

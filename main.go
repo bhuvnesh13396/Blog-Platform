@@ -32,13 +32,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	accountRepo := psql.NewAccountRepo(db)
-	articleRepo := psql.NewArticleRepo(db)
+	accountRepo, err := psql.NewAccountRepo(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	articleRepo, err := psql.NewArticleRepo(db)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	accountService := account.NewService(accountRepo)
 	accountHandler := account.NewHandler(accountService)
 
-	articleService := article.NewService(articleRepo)
+	articleService := article.NewService(articleRepo, accountRepo)
 	articleHandler := article.NewHandler(articleService)
 
 	r := http.NewServeMux()

@@ -10,10 +10,16 @@ type articleRepo struct {
 	db *sql.DB
 }
 
-func NewArticleRepo(db *sql.DB) *articleRepo {
+func NewArticleRepo(db *sql.DB) (*articleRepo, error) {
+	query := "CREATE TABLE IF NOT EXISTS article (id varchar primary key, title varchar, description varchar)"
+	_, err := db.Exec(query)
+	if err != nil {
+		return nil, err
+	}
+
 	return &articleRepo{
 		db: db,
-	}
+	}, nil
 }
 
 func (repo *articleRepo) Add(a model.Article) (err error) {
