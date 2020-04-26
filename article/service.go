@@ -12,10 +12,10 @@ var (
 )
 
 type Service interface {
-	GetArticle(ctx context.Context, id string) (article GetRes, err error)
-	AddArticle(ctx context.Context, id string, userID string, title string, description string) (err error)
-	UpdateArticle(ctx context.Context, id string, title string) (err error)
-	GetAllArticle(ctx context.Context) (article []GetRes, err error)
+	Get(ctx context.Context, id string) (article GetRes, err error)
+	Add(ctx context.Context, id string, userID string, title string, description string) (err error)
+	Update(ctx context.Context, id string, title string) (err error)
+	List(ctx context.Context) (article []GetRes, err error)
 }
 
 type service struct {
@@ -30,7 +30,7 @@ func NewService(articleRepo model.ArticleRepo, accountRepo model.AccountRepo) Se
 	}
 }
 
-func (s *service) GetArticle(ctx context.Context, id string) (article GetRes, err error) {
+func (s *service) Get(ctx context.Context, id string) (article GetRes, err error) {
 	if len(id) < 1 {
 		err = errInvalidArgument
 		return
@@ -56,7 +56,7 @@ func (s *service) GetArticle(ctx context.Context, id string) (article GetRes, er
 	return
 }
 
-func (s *service) AddArticle(ctx context.Context, id string, userID string, title string, description string) (err error) {
+func (s *service) Add(ctx context.Context, id string, userID string, title string, description string) (err error) {
 	article := model.Article{
 		ID:          id,
 		Title:       title,
@@ -71,7 +71,7 @@ func (s *service) AddArticle(ctx context.Context, id string, userID string, titl
 	return s.articleRepo.Add(article)
 }
 
-func (s *service) UpdateArticle(ctx context.Context, id string, title string) (err error) {
+func (s *service) Update(ctx context.Context, id string, title string) (err error) {
 	if len(id) < 1 || len(title) < 1 {
 		err = errInvalidArgument
 		return
@@ -80,13 +80,28 @@ func (s *service) UpdateArticle(ctx context.Context, id string, title string) (e
 	return s.articleRepo.Update(id, title)
 }
 
-func (s *service) GetAllArticle(ctx context.Context) (article []GetRes, err error) {
+func (s *service) List(ctx context.Context) (article []GetRes, err error) {
 	articles, err := s.articleRepo.GetAll()
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	for i, a := range articles {
+	for i := range articles {
+		a := &articles[i]
+		user, err := s.accountRepo.Get(a.UserID)
+		if err != nil {
+			return nil, err
+		}
 
+		ar := GetRes{
+			ID: a.ID,
+			Title: a.Title,
+			Description: a.Description,
+			User: user,
+		}
+
+		article = append(article, ar)
 	}
+
+	return
 }

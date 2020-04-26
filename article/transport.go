@@ -19,7 +19,7 @@ func NewHandler(s Service) http.Handler {
 
 	getArticle := func(w http.ResponseWriter, req *http.Request) {
 		id, _ := mux.Vars(req)["id"]
-		a, err := s.GetArticle(ctx, id)
+		a, err := s.Get(ctx, id)
 		resp.WriteResp(w, a, err)
 	}
 
@@ -30,7 +30,7 @@ func NewHandler(s Service) http.Handler {
 			resp.WriteResp(w, nil, err)
 			return
 		}
-		err = s.AddArticle(ctx, addReq.ID, addReq.UserID, addReq.Title, addReq.Description)
+		err = s.Add(ctx, addReq.ID, addReq.UserID, addReq.Title, addReq.Description)
 		resp.WriteResp(w, nil, err)
 	}
 
@@ -42,19 +42,19 @@ func NewHandler(s Service) http.Handler {
 			return
 		}
 
-		err = s.UpdateArticle(ctx, updateReq.ID, updateReq.Title)
+		err = s.Update(ctx, updateReq.ID, updateReq.Title)
 		resp.WriteResp(w, nil, err)
 	}
 
-	getAllArticle := func(w http.ResponseWriter, req *http.Request) {
-		articles, err := s.GetAllArticle(ctx)
+	list := func(w http.ResponseWriter, req *http.Request) {
+		articles, err := s.List(ctx)
 		resp.WriteResp(w, articles, err)
 	}
 
 	r.HandleFunc("/article", addArticle).Methods(http.MethodPost)
 	r.HandleFunc("/article", updateArticle).Methods(http.MethodPut)
 	r.HandleFunc("/article/{id}", getArticle).Methods(http.MethodGet)
-	r.HandleFunc("/article", getAllArticle).Methods(http.MethodGet)
+	r.HandleFunc("/article", list).Methods(http.MethodGet)
 
 	return r
 }
