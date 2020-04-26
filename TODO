@@ -2,8 +2,14 @@
 	- Request: none
 	- Response: array of model.Account, err
 
-- List Article
-	- Request: none
-	- Response: array of GetRes, err
-
 - Comment Service
+	- Comment: Id, UserID, ArticleID, Text, Date
+	- Add Comment
+	- List comments for an article
+	- List comments by a User
+
+- Client
+
+- Authentication
+
+- Use case for Go routines
