@@ -17,4 +17,5 @@ type AccountRepo interface {
 	Add(acc Account) (err error)
 	Get(id string) (account Account, err error)
 	Update(id string, name string) (err error)
+	GetAll() (accounts []Account, err error)
 }

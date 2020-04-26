@@ -15,6 +15,7 @@ type Service interface {
 	GetAccount(ctx context.Context, id string) (account model.Account, err error)
 	AddAccount(ctx context.Context, id string, name string) (err error)
 	UpdateAccount(ctx context.Context, id string, name string) (err error)
+	GetAllAccount(ctx context.Context) (account []model.Account, err error)
 }
 
 type service struct {
@@ -57,4 +58,8 @@ func (s *service) UpdateAccount(ctx context.Context, id string, name string) (er
 
 	return s.accountRepo.Update(id, name)
 
+}
+
+func (s *service) GetAllAccount(ctx context.Context) (accounts []model.Account, err error) {
+	return s.accountRepo.GetAll()
 }

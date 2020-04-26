@@ -46,9 +46,15 @@ func NewHandler(s Service) http.Handler {
 		resp.WriteResp(w, nil, err)
 	}
 
+	getAllAccount := func(w http.ResponseWriter, req *http.Request) {
+		a, err := s.GetAllAccount(ctx)
+		resp.WriteResp(w, a, err)
+	}
+
 	r.HandleFunc("/account/{id}", getAccount).Methods(http.MethodGet)
 	r.HandleFunc("/account", addAccount).Methods(http.MethodPost)
 	r.HandleFunc("/account", updateAccount).Methods(http.MethodPut)
+	r.HandleFunc("/account", getAllAccount).Methods(http.MethodGet)
 
 	return r
 }

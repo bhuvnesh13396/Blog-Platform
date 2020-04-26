@@ -26,4 +26,5 @@ type ArticleRepo interface {
 	Add(article Article) (err error)
 	Get(id string) (article Article, err error)
 	Update(id string, title string) (err error)
+	GetAll() (article []Article, err error)
 }

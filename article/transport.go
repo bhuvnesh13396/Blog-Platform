@@ -14,7 +14,6 @@ var (
 	ctx = context.Background()
 )
 
-
 func NewHandler(s Service) http.Handler {
 	r := mux.NewRouter()
 
@@ -47,8 +46,15 @@ func NewHandler(s Service) http.Handler {
 		resp.WriteResp(w, nil, err)
 	}
 
+	getAllArticle := func(w http.ResponseWriter, req *http.Request) {
+		articles, err := s.GetAllArticle(ctx)
+		resp.WriteResp(w, articles, err)
+	}
+
 	r.HandleFunc("/article", addArticle).Methods(http.MethodPost)
 	r.HandleFunc("/article", updateArticle).Methods(http.MethodPut)
 	r.HandleFunc("/article/{id}", getArticle).Methods(http.MethodGet)
+	r.HandleFunc("/article", getAllArticle).Methods(http.MethodGet)
+
 	return r
 }

@@ -1,8 +1,6 @@
 package article
 
-import (
-	"sample/model"
-)
+import "sample/model"
 
 type AddReq struct {
 	ID          string `json:"id"`

@@ -15,7 +15,7 @@ type Service interface {
 	GetArticle(ctx context.Context, id string) (article GetRes, err error)
 	AddArticle(ctx context.Context, id string, userID string, title string, description string) (err error)
 	UpdateArticle(ctx context.Context, id string, title string) (err error)
-	//GetAllArticle(ctx context.Context) (err error)
+	GetAllArticle(ctx context.Context) (article []GetRes, err error)
 }
 
 type service struct {
@@ -78,4 +78,15 @@ func (s *service) UpdateArticle(ctx context.Context, id string, title string) (e
 	}
 
 	return s.articleRepo.Update(id, title)
+}
+
+func (s *service) GetAllArticle(ctx context.Context) (article []GetRes, err error) {
+	articles, err := s.articleRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for i, a := range articles {
+
+	}
 }

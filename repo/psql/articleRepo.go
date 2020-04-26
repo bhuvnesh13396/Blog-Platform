@@ -2,7 +2,6 @@ package psql
 
 import (
 	"database/sql"
-
 	"sample/model"
 )
 
@@ -43,4 +42,26 @@ func (repo *articleRepo) Update(id, title string) (err error) {
 	query := "UPDATE article SET title = $2 WHERE ID = $1"
 	_, err = repo.db.Exec(query, id, title)
 	return
+}
+
+func (repo *articleRepo) GetAll() (allArticles []model.Article, err error) {
+	query := "SELECT * from article"
+	rows, err := repo.db.Query(query)
+	var articles []model.Article
+	if err != nil {
+		return articles, model.ErrArticleNotFound
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var a model.Article
+		err = rows.Scan(&a.ID, &a.Title, &a.UserID, &a.Description)
+		if err != nil {
+			return nil, model.ErrArticleNotFound
+		}
+
+		articles = append(articles, a)
+	}
+
+	return articles, err
 }

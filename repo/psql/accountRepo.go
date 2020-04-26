@@ -45,3 +45,26 @@ func (repo *accountRepo) Update(id string, name string) (err error) {
 	_, err = repo.db.Exec(q, id, name)
 	return
 }
+
+func (repo *accountRepo) GetAll() (allAccounts []model.Account, err error) {
+	query := "SELECT id, name from account"
+	rows, err := repo.db.Query(query)
+	var accounts []model.Account
+	if err != nil {
+		return accounts, model.ErrAccountNotFound
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var ID string
+		var Name string
+		err = rows.Scan(&ID, &Name)
+		if err != nil {
+			return accounts, model.ErrAccountNotFound
+		}
+
+		accounts = append(accounts, model.Account{ID, Name})
+	}
+
+	return accounts, err
+}
