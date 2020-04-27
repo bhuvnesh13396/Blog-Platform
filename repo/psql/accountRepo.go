@@ -51,19 +51,18 @@ func (repo *accountRepo) GetAll() (allAccounts []model.Account, err error) {
 	rows, err := repo.db.Query(query)
 	var accounts []model.Account
 	if err != nil {
-		return accounts, model.ErrAccountNotFound
+		return
 	}
 
 	defer rows.Close()
 	for rows.Next() {
-		var ID string
-		var Name string
-		err = rows.Scan(&ID, &Name)
+		var a model.Account
+		err = rows.Scan(&a.ID, &a.Name)
 		if err != nil {
-			return accounts, model.ErrAccountNotFound
+			return nil, model.ErrAccountNotFound
 		}
 
-		accounts = append(accounts, model.Account{ID, Name})
+		accounts = append(accounts, a)
 	}
 
 	return accounts, err
