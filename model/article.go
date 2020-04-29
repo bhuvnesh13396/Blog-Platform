@@ -11,7 +11,7 @@ var (
 type Article struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
-	UserID      string `json:user_id"`
+	UserID      string `json:"user_id"`
 	Description string `json:"description"`
 }
 

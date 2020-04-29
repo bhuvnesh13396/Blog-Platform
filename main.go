@@ -11,6 +11,7 @@ import (
 
 	"sample/account"
 	"sample/article"
+	"sample/comment"
 	"sample/repo/psql"
 
 	_ "github.com/lib/pq"
@@ -42,11 +43,19 @@ func main() {
 		log.Fatal(err)
 	}
 
+	commentRepo, err := psql.NewCommentRepo(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	accountService := account.NewService(accountRepo)
 	accountHandler := account.NewHandler(accountService)
 
 	articleService := article.NewService(articleRepo, accountRepo)
 	articleHandler := article.NewHandler(articleService)
+
+	commentService := comment.NewService(commentRepo, articleRepo, accountRepo)
+	commentHandler := comment.NewHandler(commentService)
 
 	r := http.NewServeMux()
 
@@ -54,6 +63,8 @@ func main() {
 	r.Handle("/article/", articleHandler)
 	r.Handle("/account", accountHandler)
 	r.Handle("/account/", accountHandler)
+	r.Handle("/comment", commentHandler)
+	r.Handle("/comment/", commentHandler)
 
 	log.Println("listening on", ":8080")
 	err = http.ListenAndServe(":8080", r)

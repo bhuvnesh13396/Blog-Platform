@@ -94,10 +94,10 @@ func (s *service) List(ctx context.Context) (article []GetRes, err error) {
 		}
 
 		ar := GetRes{
-			ID: a.ID,
-			Title: a.Title,
+			ID:          a.ID,
+			Title:       a.Title,
 			Description: a.Description,
-			User: user,
+			User:        user,
 		}
 
 		article = append(article, ar)
