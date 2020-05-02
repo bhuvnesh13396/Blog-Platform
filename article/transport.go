@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"sample/common/resp"
+	"sample/common/kit"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 )
 
 var (
@@ -17,44 +18,81 @@ var (
 func NewHandler(s Service) http.Handler {
 	r := mux.NewRouter()
 
-	getArticle := func(w http.ResponseWriter, req *http.Request) {
-		id, _ := mux.Vars(req)["id"]
-		a, err := s.Get(ctx, id)
-		resp.WriteResp(w, a, err)
-	}
+	get := kit.NewServer(
+		MakeGetEndpoint(s),
+		DecodeGetRequest,
+		kit.EncodeJSONResponse,
+	)
 
-	addArticle := func(w http.ResponseWriter, req *http.Request) {
-		var addReq AddReq
-		err := json.NewDecoder(req.Body).Decode(&addReq)
-		if err != nil {
-			resp.WriteResp(w, nil, err)
-			return
-		}
-		err = s.Add(ctx, addReq.ID, addReq.UserID, addReq.Title, addReq.Description)
-		resp.WriteResp(w, nil, err)
-	}
+	add := kit.NewServer(
+		MakeAddEndpoint(s),
+		DecodeAddRequest,
+		kit.EncodeJSONResponse,
+	)
 
-	updateArticle := func(w http.ResponseWriter, req *http.Request) {
-		var updateReq UpdateReq
-		err := json.NewDecoder(req.Body).Decode(&updateReq)
-		if err != nil {
-			resp.WriteResp(w, nil, err)
-			return
-		}
+	update := kit.NewServer(
+		MakeUpdateEndpoint(s),
+		DecodeUpdateRequest,
+		kit.EncodeJSONResponse,
+	)
 
-		err = s.Update(ctx, updateReq.ID, updateReq.Title)
-		resp.WriteResp(w, nil, err)
-	}
+	list := kit.NewServer(
+		MakeListEndpoint(s),
+		DecodeListRequest,
+		kit.EncodeJSONResponse,
+	)
 
-	list := func(w http.ResponseWriter, req *http.Request) {
-		articles, err := s.List(ctx)
-		resp.WriteResp(w, articles, err)
-	}
-
-	r.HandleFunc("/article", addArticle).Methods(http.MethodPost)
-	r.HandleFunc("/article", updateArticle).Methods(http.MethodPut)
-	r.HandleFunc("/article/{id}", getArticle).Methods(http.MethodGet)
-	r.HandleFunc("/article", list).Methods(http.MethodGet)
+	r.Handle("/article/one", get).Methods(http.MethodGet)
+	r.Handle("/article", add).Methods(http.MethodPost)
+	r.Handle("/article", update).Methods(http.MethodPut)
+	r.Handle("/article", list).Methods(http.MethodGet)
 
 	return r
+}
+
+func DecodeGetRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req getRequest
+	err := schema.NewDecoder().Decode(&req, r.URL.Query())
+	return req, err
+}
+
+func DecodeGetResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp getResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
+}
+
+func DecodeAddRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req addRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	return req, err
+}
+
+func DecodeAddResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp addResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
+}
+
+func DecodeUpdateRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req updateRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	return req, err
+}
+
+func DecodeUpdateResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp updateResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
+}
+
+func DecodeListRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req listRequest
+	return req, nil
+}
+
+func DecodeListResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp listResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
 }

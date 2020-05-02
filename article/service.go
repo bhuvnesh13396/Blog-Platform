@@ -12,10 +12,10 @@ var (
 )
 
 type Service interface {
-	Get(ctx context.Context, id string) (article GetRes, err error)
+	Get(ctx context.Context, id string) (res GetRes, err error)
 	Add(ctx context.Context, id string, userID string, title string, description string) (err error)
 	Update(ctx context.Context, id string, title string) (err error)
-	List(ctx context.Context) (article []GetRes, err error)
+	List(ctx context.Context) (res []GetRes, err error)
 }
 
 type service struct {
@@ -80,7 +80,7 @@ func (s *service) Update(ctx context.Context, id string, title string) (err erro
 	return s.articleRepo.Update(id, title)
 }
 
-func (s *service) List(ctx context.Context) (article []GetRes, err error) {
+func (s *service) List(ctx context.Context) (res []GetRes, err error) {
 	articles, err := s.articleRepo.GetAll()
 	if err != nil {
 		return
@@ -90,17 +90,17 @@ func (s *service) List(ctx context.Context) (article []GetRes, err error) {
 		a := &articles[i]
 		user, err := s.accountRepo.Get(a.UserID)
 		if err != nil {
-			return nil, err
+			return []GetRes{}, err
 		}
 
 		ar := GetRes{
-			ID: a.ID,
-			Title: a.Title,
+			ID:          a.ID,
+			Title:       a.Title,
 			Description: a.Description,
-			User: user,
+			User:        user,
 		}
 
-		article = append(article, ar)
+		res = append(res, ar)
 	}
 
 	return

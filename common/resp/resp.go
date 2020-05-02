@@ -16,6 +16,7 @@ func WriteResp(w http.ResponseWriter, data interface{}, err error) {
 		r.Data = &data
 	} else {
 		r.Error = err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 	json.NewEncoder(w).Encode(r)
 }
