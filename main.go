@@ -13,6 +13,7 @@ import (
 	"sample/article"
 	"sample/comment"
 	"sample/repo/psql"
+	"sample/tag"
 
 	_ "github.com/lib/pq"
 )
@@ -48,6 +49,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	tagRepo, err := psql.NewTagRepo(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	accountService := account.NewService(accountRepo)
 	accountHandler := account.NewHandler(accountService)
 
@@ -57,6 +63,9 @@ func main() {
 	commentService := comment.NewService(commentRepo, articleRepo, accountRepo)
 	commentHandler := comment.NewHandler(commentService)
 
+	tagService := tag.NewService(tagRepo)
+	tagHandler := tag.NewHandler(tagService)
+
 	r := http.NewServeMux()
 
 	r.Handle("/article", articleHandler)
@@ -65,6 +74,8 @@ func main() {
 	r.Handle("/account/", accountHandler)
 	r.Handle("/comment", commentHandler)
 	r.Handle("/comment/", commentHandler)
+	r.Handle("/tag", tagHandler)
+	r.Handle("/tag/", tagHandler)
 
 	log.Println("listening on", ":8080")
 	err = http.ListenAndServe(":8080", r)
