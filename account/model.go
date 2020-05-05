@@ -9,3 +9,8 @@ type UpdateReq struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
+
+type GetRes struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}

@@ -10,13 +10,14 @@ type tagRepo struct {
 }
 
 func NewTagRepo(db *sql.DB) (*tagRepo, error) {
-	query := "CREATE TABLE IF NOT EXISTS tag (id varchar primary key, name varchar, description varchar)"
-	_, err := db.Exec(query)
+	querytoCreateTag := "CREATE TABLE IF NOT EXISTS tag (id varchar primary key, name varchar, description varchar)"
+	_, err := db.Exec(querytoCreateTag)
 	if err != nil {
 		return nil, err
 	}
 
-	query := "CREATE TABLE IF NOT EXISTS tag_article (tag_id varchar NOT NULL, article_id varchar NOT NULL, PRIMARY KEY(tag_id, article_id))"
+	queryToCreateTagArticle := "CREATE TABLE IF NOT EXISTS tag_article (tag_id varchar NOT NULL, article_id varchar NOT NULL, PRIMARY KEY(tag_id, article_id))"
+	_, err = db.Exec(queryToCreateTagArticle)
 
 	return &tagRepo{
 		db: db,
@@ -28,3 +29,7 @@ func (repo *tagRepo) Add(t model.Tag) (err error) {
 	_, err = repo.db.Exec(query, t.ID, t.Name, t.Description)
 	return
 }
+
+// func (repo *tagRepo) AddToArticle(tagID, articleID string) (err error) {
+// 	query
+// }
