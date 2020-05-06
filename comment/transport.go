@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"sample/common/resp"
+	"sample/common/kit"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 )
 
 var (
@@ -16,46 +17,83 @@ var (
 func NewHandler(s Service) http.Handler {
 	r := mux.NewRouter()
 
-	addComment := func(w http.ResponseWriter, req *http.Request) {
-		var addReq AddReq
-		err := json.NewDecoder(req.Body).Decode(&addReq)
-		if err != nil {
-			resp.WriteResp(w, nil, err)
-			return
-		}
+	getUserComment := kit.NewServer(
+		MakeGetUserCommentEndpoint(s),
+		DecodeGetUserCommentRequest,
+		kit.EncodeJSONResponse,
+	)
 
-		err = s.Add(ctx, addReq.ID, addReq.UserID, addReq.Text, addReq.ArticleID, addReq.CreatedDate)
-		resp.WriteResp(w, nil, err)
-	}
+	getArticleComment := kit.NewServer(
+		MakeGetArticleCommentEndpoint(s),
+		DecodeGetArticleCommentRequest,
+		kit.EncodeJSONResponse,
+	)
 
-	updateComment := func(w http.ResponseWriter, req *http.Request) {
-		var updateReq UpdateReq
-		err := json.NewDecoder(req.Body).Decode(&updateReq)
-		if err != nil {
-			resp.WriteResp(w, nil, err)
-			return
-		}
+	add := kit.NewServer(
+		MakeAddEndpoint(s),
+		DecodeAddRequest,
+		kit.EncodeJSONResponse,
+	)
 
-		err = s.Update(ctx, updateReq.ID, updateReq.Text)
-		resp.WriteResp(w, nil, err)
-	}
+	update := kit.NewServer(
+		MakeUpdateEndpoint(s),
+		DecodeUpdateRequest,
+		kit.EncodeJSONResponse,
+	)
 
-	getUserComment := func(w http.ResponseWriter, req *http.Request) {
-		id, _ := mux.Vars(req)["id"]
-		c, err := s.GetUserComment(ctx, id)
-		resp.WriteResp(w, c, err)
-	}
-
-	getArticleComment := func(w http.ResponseWriter, req *http.Request) {
-		id, _ := mux.Vars(req)["id"]
-		c, err := s.GetArticleComment(ctx, id)
-		resp.WriteResp(w, c, err)
-	}
-
-	r.HandleFunc("/comment", addComment).Methods(http.MethodPost)
-	r.HandleFunc("/comment", updateComment).Methods(http.MethodPut)
-	r.HandleFunc("/comment/user/id", getUserComment).Methods(http.MethodGet)
-	r.HandleFunc("/comment/article/id", getArticleComment).Methods(http.MethodGet)
+	r.Handle("/comment/{user_id}", getUserComment).Methods(http.MethodGet)
+	r.Handle("/comment/{article_id}", getArticleComment).Methods(http.MethodGet)
+	r.Handle("/comment", add).Methods(http.MethodPost)
+	r.Handle("/comment", update).Methods(http.MethodPut)
 
 	return r
+
+}
+
+func DecodeGetUserCommentRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req getRequest
+	err := schema.NewDecoder().Decode(&req, r.URL.Query())
+	return req, err
+}
+
+func DecodeGetUserCommentResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp getResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
+}
+
+func DecodeGetArticleCommentRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req getRequest
+	err := schema.NewDecoder().Decode(&req, r.URL.Query())
+	return req, err
+}
+
+func DecodeGetArticleCommentResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp getResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
+}
+
+func DecodeAddRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req addRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	return req, err
+}
+
+func DecodeAddResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp addResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
+}
+
+func DecodeUpdateRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req updateRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	return req, err
+}
+
+func DecodeUpdateResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp updateResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
 }
