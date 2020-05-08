@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"sample/common/kit"
+	"sample/common/auth/token"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
@@ -17,35 +18,43 @@ var (
 
 func NewHandler(s Service) http.Handler {
 	r := mux.NewRouter()
+	 
+	opts := []kit.ServerOption{
+                kit.ServerBefore(token.HTTPTokenToContext),
+        }
 
 	get := kit.NewServer(
 		MakeGetEndpoint(s),
 		DecodeGetRequest,
 		kit.EncodeJSONResponse,
+		opts...,
 	)
 
 	add := kit.NewServer(
 		MakeAddEndpoint(s),
 		DecodeAddRequest,
 		kit.EncodeJSONResponse,
+		opts...,
 	)
 
 	update := kit.NewServer(
 		MakeUpdateEndpoint(s),
 		DecodeUpdateRequest,
 		kit.EncodeJSONResponse,
+		opts...,
 	)
 
 	list := kit.NewServer(
 		MakeListEndpoint(s),
 		DecodeListRequest,
 		kit.EncodeJSONResponse,
+		opts...,
 	)
 
-	r.Handle("/article/one", get).Methods(http.MethodGet)
+	r.Handle("/article", get).Methods(http.MethodGet)
 	r.Handle("/article", add).Methods(http.MethodPost)
 	r.Handle("/article", update).Methods(http.MethodPut)
-	r.Handle("/article", list).Methods(http.MethodGet)
+	r.Handle("/article/all", list).Methods(http.MethodGet)
 
 	return r
 }

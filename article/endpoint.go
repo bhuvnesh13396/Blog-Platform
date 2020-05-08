@@ -44,32 +44,32 @@ func (e GetEndpoint) Get(ctx context.Context, id string) (article GetRes, err er
 }
 
 type addRequest struct {
-	ID          string `json:"id"`
 	UserID      string `json:"user_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
 
 type addResponse struct {
-}
-
-func (e AddEndpoint) Add(ctx context.Context, id string, userID string, title string, description string) (err error) {
-	request := addRequest{
-		ID:          id,
-		UserID:      userID,
-		Title:       title,
-		Description: description,
-	}
-	_, err = e(ctx, request)
-	return err
+	ID string `json:"id"`
 }
 
 func MakeAddEndpoint(s Service) kit.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(addRequest)
-		err := s.Add(ctx, req.ID, req.UserID, req.Title, req.Description)
-		return addResponse{}, err
+		id, err := s.Add(ctx, req.UserID, req.Title, req.Description)
+		return addResponse{ID: id}, err
 	}
+}
+
+func (e AddEndpoint) Add(ctx context.Context, userID string, title string, description string) (id string, err error) {
+	request := addRequest{
+		UserID:      userID,
+		Title:       title,
+		Description: description,
+	}
+	response, err := e(ctx, request)
+	resp := response.(addResponse)
+	return resp.ID, err
 }
 
 type updateRequest struct {
@@ -112,7 +112,7 @@ func MakeListEndpoint(s Service) kit.Endpoint {
 }
 
 func (e ListEndpoint) List(ctx context.Context) (res []GetRes, err error) {
-	request := getRequest{}
+	request := listRequest{}
 	response, err := e(ctx, request)
 	resp := response.(listResponse)
 	return resp.Articles, err

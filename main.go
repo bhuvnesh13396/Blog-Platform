@@ -11,6 +11,7 @@ import (
 
 	"sample/account"
 	"sample/article"
+	"sample/auth"
 	"sample/comment"
 	"sample/repo/psql"
 	"sample/tag"
@@ -39,6 +40,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	sessionRepo, err := psql.NewSessionRepo(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	articleRepo, err := psql.NewArticleRepo(db)
 	if err != nil {
 		log.Fatal(err)
@@ -54,10 +60,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	authService := auth.NewService(sessionRepo, accountRepo)
+	authHandler := auth.NewHandler(authService)
+
 	accountService := account.NewService(accountRepo)
 	accountHandler := account.NewHandler(accountService)
 
 	articleService := article.NewService(articleRepo, accountRepo)
+	articleService = article.NewAuthService(articleService, authService)
 	articleHandler := article.NewHandler(articleService)
 
 	commentService := comment.NewService(commentRepo, articleRepo, accountRepo)
@@ -68,6 +78,8 @@ func main() {
 
 	r := http.NewServeMux()
 
+	r.Handle("/auth", authHandler)
+	r.Handle("/auth/", authHandler)
 	r.Handle("/article", articleHandler)
 	r.Handle("/article/", articleHandler)
 	r.Handle("/account", accountHandler)

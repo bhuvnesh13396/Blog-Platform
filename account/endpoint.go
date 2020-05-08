@@ -19,7 +19,7 @@ type Endpoint struct {
 }
 
 type getRequest struct {
-	ID string `schema:"id"`
+	Username string `schema:"username"`
 }
 
 type getResponse struct {
@@ -29,14 +29,14 @@ type getResponse struct {
 func MakeGetEndpoint(s Service) kit.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(getRequest)
-		account, err := s.GetAccount(ctx, req.ID)
+		account, err := s.Get(ctx, req.Username)
 		return getResponse{Account: account}, err
 	}
 }
 
-func (e GetEndpoint) Get(ctx context.Context, id string) (account model.Account, err error) {
+func (e GetEndpoint) Get(ctx context.Context, username string) (account model.Account, err error) {
 	request := getRequest{
-		ID: id,
+		Username: username,
 	}
 	response, err := e(ctx, request)
 	resp := response.(getResponse)
@@ -44,33 +44,35 @@ func (e GetEndpoint) Get(ctx context.Context, id string) (account model.Account,
 }
 
 type addRequest struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type addResponse struct {
 }
 
-func (e AddEndpoint) Add(ctx context.Context, id, name string) (err error) {
+func MakeAddEndpoint(s Service) kit.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(addRequest)
+		err := s.Add(ctx, req.Name, req.Username, req.Password)
+		return addResponse{}, err
+	}
+}
+
+func (e AddEndpoint) Add(ctx context.Context, name string, username string, password string) (err error) {
 	request := addRequest{
-		ID:   id,
-		Name: name,
+		Name:     name,
+		Username: username,
+		Password: password,
 	}
 	_, err = e(ctx, request)
 	return err
 }
 
-func MakeAddEndpoint(s Service) kit.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(addRequest)
-		err := s.AddAccount(ctx, req.ID, req.Name)
-		return addResponse{}, err
-	}
-}
-
 type updateRequest struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
 }
 
 type updateResponse struct {
@@ -79,15 +81,15 @@ type updateResponse struct {
 func MakeUpdateEndpoint(s Service) kit.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateRequest)
-		err := s.UpdateAccount(ctx, req.ID, req.Name)
+		err := s.Update(ctx, req.Username, req.Name)
 		return updateResponse{}, err
 	}
 }
 
-func (e UpdateEndpoint) Update(ctx context.Context, id, name string) (err error) {
+func (e UpdateEndpoint) Update(ctx context.Context, username string, name string) (err error) {
 	request := updateRequest{
-		ID:   id,
-		Name: name,
+		Username: username,
+		Name:     name,
 	}
 
 	_, err = e(ctx, request)
@@ -103,7 +105,7 @@ type listResponse struct {
 
 func MakeListEndpoint(s Service) kit.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		accounts, err := s.GetAllAccount(ctx)
+		accounts, err := s.List(ctx)
 		return listResponse{Accounts: accounts}, err
 	}
 }
