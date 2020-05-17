@@ -13,6 +13,7 @@ import (
 	"sample/article"
 	"sample/auth"
 	"sample/comment"
+	"sample/common/kit"
 	"sample/repo/psql"
 	"sample/tag"
 
@@ -34,6 +35,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	logger := kit.NewJSONLogger(os.Stdout)
 
 	accountRepo, err := psql.NewAccountRepo(db)
 	if err != nil {
@@ -67,6 +70,7 @@ func main() {
 	accountHandler := account.NewHandler(accountService)
 
 	articleService := article.NewService(articleRepo, accountRepo)
+	articleService = article.NewLogService(articleService, kit.LoggerWith(logger, "service", "Article"))
 	articleService = article.NewAuthService(articleService, authService)
 	articleHandler := article.NewHandler(articleService)
 
