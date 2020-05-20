@@ -41,10 +41,10 @@ func NewHandler(s Service) http.Handler {
 		kit.EncodeJSONResponse,
 	)
 
-	r.Handle("/account/{id}", get).Methods(http.MethodGet)
+	r.Handle("/account", get).Methods(http.MethodGet)
 	r.Handle("/account", add).Methods(http.MethodPost)
 	r.Handle("/account", update).Methods(http.MethodPut)
-	r.Handle("/account", list).Methods(http.MethodGet)
+	r.Handle("/account/all", list).Methods(http.MethodGet)
 
 	return r
 }
@@ -55,16 +55,22 @@ func DecodeGetRequest(ctx context.Context, r *http.Request) (interface{}, error)
 	return req, err
 }
 
+func DecodeGetResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp getResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
+}
+
 func DecodeAddRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	var req addRequest
-	err := schema.NewDecoder().Decode(&req, r.URL.Query())
+	err := json.NewDecoder(r.Body).Decode(&req)
 	return req, err
 }
 
 func DecodeAddResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var req addRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	return req, err
+	var resp addResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
 }
 
 func DecodeUpdateRequest(ctx context.Context, r *http.Request) (interface{}, error) {

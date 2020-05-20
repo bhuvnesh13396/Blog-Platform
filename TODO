@@ -1,15 +1,22 @@
-- List Account
-	- Request: none
-	- Response: array of model.Account, err
+- Add authentication in Account, Comment and Tag service
+	- add opts in transport.go and client.go
+	- add auth.go file
+	- add authService in main.go
 
-- Comment Service
-	- Comment: Id, UserID, ArticleID, Text, Date
-	- Add Comment
-	- List comments for an article
-	- List comments by a User
+- Add client application flow
+	- Add account
+	- Signin
+	- Create context with token
+	- Add/Update article
+	- Add comment
+	- Add tag
 
-- Client
+- Add logging
 
-- Authentication
+- Top 10 tags/articles using redis
+
+- Use separate binaries for account, article and comment service
+
+- Service discovery with load balancing
 
 - Use case for Go routines

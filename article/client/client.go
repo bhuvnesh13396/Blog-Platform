@@ -6,6 +6,7 @@ import (
 
 	"sample/article"
 	"sample/common/kit"
+	"sample/common/auth/token"
 )
 
 func New(instance string, client *http.Client) (article.Service, error) {
@@ -14,11 +15,17 @@ func New(instance string, client *http.Client) (article.Service, error) {
 		return nil, err
 	}
 
+	opts := []kit.ClientOption {
+		kit.SetClient(client),
+		kit.ClientBefore(token.HTTPTokenFromContext),
+        }
+
 	getEndpoint := kit.NewClient(
 		http.MethodGet,
-		copyURL(u, "/article/one"),
+		copyURL(u, "/article"),
 		kit.EncodeSchemaRequest,
 		article.DecodeGetResponse,
+		opts...,
 	).Endpoint()
 
 	addEndpoint := kit.NewClient(
@@ -26,6 +33,7 @@ func New(instance string, client *http.Client) (article.Service, error) {
 		copyURL(u, "/article"),
 		kit.EncodeJSONRequest,
 		article.DecodeAddResponse,
+		opts...,
 	).Endpoint()
 
 	updateEndpoint := kit.NewClient(
@@ -33,13 +41,15 @@ func New(instance string, client *http.Client) (article.Service, error) {
 		copyURL(u, "/article"),
 		kit.EncodeJSONRequest,
 		article.DecodeUpdateResponse,
+		opts...,
 	).Endpoint()
 
 	listEndpoint := kit.NewClient(
 		http.MethodGet,
-		copyURL(u, "/article"),
+		copyURL(u, "/article/all"),
 		kit.EncodeSchemaRequest,
 		article.DecodeListResponse,
+		opts...,
 	).Endpoint()
 
 	return &article.Endpoint{

@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 
+	"sample/common/id"
 	"sample/model"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -12,10 +15,10 @@ var (
 )
 
 type Service interface {
-	GetAccount(ctx context.Context, id string) (account model.Account, err error)
-	AddAccount(ctx context.Context, id string, name string) (err error)
-	UpdateAccount(ctx context.Context, id string, name string) (err error)
-	GetAllAccount(ctx context.Context) (account []model.Account, err error)
+	Get(ctx context.Context, username string) (account model.Account, err error)
+	Add(ctx context.Context, name string, username string, password string) (err error)
+	Update(ctx context.Context, username string, name string) (err error)
+	List(ctx context.Context) (account []model.Account, err error)
 }
 
 type service struct {
@@ -28,38 +31,45 @@ func NewService(accountRepo model.AccountRepo) Service {
 	}
 }
 
-func (s *service) GetAccount(ctx context.Context, id string) (account model.Account, err error) {
-	if len(id) < 1 {
+func (s *service) Get(ctx context.Context, username string) (account model.Account, err error) {
+	if len(username) < 1 {
 		err = errInvalidArgument
 		return
 	}
-	return s.accountRepo.Get(id)
+	return s.accountRepo.Get1(username)
 }
 
-func (s *service) AddAccount(ctx context.Context, id string, name string) (err error) {
-	if len(id) < 1 || len(name) < 1 {
-		err = errInvalidArgument
+func (s *service) Add(ctx context.Context, name string, username string, password string) (err error) {
+	// TODO return proper error messages
+	if len(name) < 1 || len(username) < 4 || len(password) < 8 {
+		return errInvalidArgument
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
 		return
 	}
 
 	acc := model.Account{
-		ID:   id,
-		Name: name,
+		ID:       id.New(),
+		Name:     name,
+		Username: username,
+		Password: string(hash),
 	}
 
 	return s.accountRepo.Add(acc)
 }
 
-func (s *service) UpdateAccount(ctx context.Context, id string, name string) (err error) {
-	if len(id) < 1 || len(name) < 1 {
+func (s *service) Update(ctx context.Context, username string, name string) (err error) {
+	if len(username) < 1 || len(name) < 1 {
 		err = errInvalidArgument
 		return
 	}
 
-	return s.accountRepo.Update(id, name)
+	return s.accountRepo.Update(username, name)
 
 }
 
-func (s *service) GetAllAccount(ctx context.Context) (accounts []model.Account, err error) {
+func (s *service) List(ctx context.Context) (accounts []model.Account, err error) {
 	return s.accountRepo.GetAll()
 }

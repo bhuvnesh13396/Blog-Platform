@@ -11,7 +11,7 @@ type accountRepo struct {
 }
 
 func NewAccountRepo(db *sql.DB) (*accountRepo, error) {
-	query := "CREATE TABLE IF NOT EXISTS account (id varchar primary key, name varchar)"
+	query := "CREATE TABLE IF NOT EXISTS account (id varchar primary key, name varchar, username varchar, password varchar)"
 	_, err := db.Exec(query)
 	if err != nil {
 		return nil, err
@@ -23,18 +23,32 @@ func NewAccountRepo(db *sql.DB) (*accountRepo, error) {
 }
 
 func (repo *accountRepo) Add(a model.Account) (err error) {
-	q := "INSERT INTO account (id, name) VALUES ($1, $2)"
-	_, err = repo.db.Exec(q, a.ID, a.Name)
+	q := "INSERT INTO account (id, name, username, password) VALUES ($1, $2, $3, $4)"
+	_, err = repo.db.Exec(q, a.ID, a.Name, a.Username, a.Password)
 	return
 }
 
 func (repo *accountRepo) Get(id string) (a model.Account, err error) {
 	row := repo.db.QueryRow("SELECT * FROM account WHERE id = $1", id)
-	switch err := row.Scan(&a.ID, &a.Name); err {
-	case sql.ErrNoRows:
-		return a, model.ErrAccountNotFound
-	case nil:
-		return a, nil
+	err = row.Scan(&a.ID, &a.Name, &a.Username, &a.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = model.ErrAccountNotFound
+		}
+		return
+	}
+
+	return
+}
+
+func (repo *accountRepo) Get1(username string) (a model.Account, err error) {
+	row := repo.db.QueryRow("SELECT * FROM account WHERE username = $1", username)
+	err = row.Scan(&a.ID, &a.Name, &a.Username, &a.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = model.ErrAccountNotFound
+		}
+		return
 	}
 
 	return
@@ -57,7 +71,7 @@ func (repo *accountRepo) GetAll() (allAccounts []model.Account, err error) {
 	defer rows.Close()
 	for rows.Next() {
 		var a model.Account
-		err = rows.Scan(&a.ID, &a.Name)
+		err = rows.Scan(&a.ID, &a.Name, &a.Username, &a.Password)
 		if err != nil {
 			return nil, model.ErrAccountNotFound
 		}

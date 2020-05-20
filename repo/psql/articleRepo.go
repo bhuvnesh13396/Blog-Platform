@@ -30,11 +30,12 @@ func (repo *articleRepo) Add(a model.Article) (err error) {
 
 func (repo *articleRepo) Get(id string) (a model.Article, err error) {
 	row := repo.db.QueryRow("SELECT * FROM article WHERE id = $1", id)
-	switch err := row.Scan(&a.ID, &a.Title, &a.Description, &a.UserID); err {
-	case sql.ErrNoRows:
-		return a, model.ErrArticleNotFound
-	case nil:
-		return a, nil
+	err = row.Scan(&a.ID, &a.Title, &a.Description, &a.UserID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = model.ErrArticleNotFound
+		}
+		return
 	}
 	return
 }

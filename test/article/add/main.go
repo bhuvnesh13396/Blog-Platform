@@ -6,30 +6,36 @@ import (
 	"net/http"
 
 	"sample/article/client"
+	"sample/common/auth/token"
 )
 
 var (
-	blogAddr = "http://localhost:8080"
-	ctx      = context.Background()
+	authtoken = "FTZDRJdnGzOvbirfJNp2LsVt"
+	blogAddr  = "http://localhost:8080"
+	ctx       = context.Background()
 )
 
 func main() {
+	ctx = context.WithValue(ctx, token.ContextKey, authtoken)
 	articleSvc, err := client.New(blogAddr, http.DefaultClient)
 	if err != nil {
 		panic(err)
 	}
 
-	err = articleSvc.Add(ctx, "qwe", "qwe", "alwkjd", "alkwjdlakw")
+	_, err = articleSvc.Add(ctx, "qwe 231", "alwkjd", "alkwjdlakw")
 	if err != nil {
 		fmt.Printf("Add Error: %+v\n", err)
 		return
 	}
 
-	a, err := articleSvc.Get(ctx, "qwe")
+	as, err := articleSvc.List(ctx)
 	if err != nil {
 		fmt.Printf("Get Error: %+v\n", err)
 		return
 	}
 
-	fmt.Printf("%+v\n", a)
+	for _, a := range as {
+		fmt.Printf("%+v\n", a)
+	}
+
 }

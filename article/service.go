@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"sample/common/err"
+	"sample/common/id"
 	"sample/model"
 )
 
@@ -13,7 +14,7 @@ var (
 
 type Service interface {
 	Get(ctx context.Context, id string) (res GetRes, err error)
-	Add(ctx context.Context, id string, userID string, title string, description string) (err error)
+	Add(ctx context.Context, userID string, title string, description string) (id string, err error)
 	Update(ctx context.Context, id string, title string) (err error)
 	List(ctx context.Context) (res []GetRes, err error)
 }
@@ -50,25 +51,34 @@ func (s *service) Get(ctx context.Context, id string) (article GetRes, err error
 		ID:          a.ID,
 		Title:       a.Title,
 		Description: a.Description,
-		User:        u,
+		User:        User{
+			ID: u.ID,
+			Username: u.Username,
+			Name: u.Name,
+		},
 	}
 
 	return
 }
 
-func (s *service) Add(ctx context.Context, id string, userID string, title string, description string) (err error) {
+func (s *service) Add(ctx context.Context, userID string, title string, description string) (aid string, err error) {
 	article := model.Article{
-		ID:          id,
-		Title:       title,
+		ID:          id.New(),
 		UserID:      userID,
+		Title:       title,
 		Description: description,
 	}
 
 	if !article.IsValid() {
-		return errInvalidArgument
+		return "", errInvalidArgument
 	}
 
-	return s.articleRepo.Add(article)
+	err = s.articleRepo.Add(article)
+	if err != nil {
+		return
+	}
+
+	return article.ID, nil
 }
 
 func (s *service) Update(ctx context.Context, id string, title string) (err error) {
@@ -88,7 +98,7 @@ func (s *service) List(ctx context.Context) (res []GetRes, err error) {
 
 	for i := range articles {
 		a := &articles[i]
-		user, err := s.accountRepo.Get(a.UserID)
+		u, err := s.accountRepo.Get(a.UserID)
 		if err != nil {
 			return []GetRes{}, err
 		}
@@ -97,7 +107,11 @@ func (s *service) List(ctx context.Context) (res []GetRes, err error) {
 			ID:          a.ID,
 			Title:       a.Title,
 			Description: a.Description,
-			User:        user,
+			User:        User{
+				ID: u.ID,
+				Username: u.Username,
+				Name: u.Name,
+			},
 		}
 
 		res = append(res, ar)
