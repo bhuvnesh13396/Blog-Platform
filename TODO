@@ -3,6 +3,10 @@
 	- add auth.go file
 	- add authService in main.go
 
+- Add logging
+
+- Use separate binaries for account, auth, tag and comment services
+
 - Add client application flow
 	- Add account
 	- Signin
@@ -11,13 +15,9 @@
 	- Add comment
 	- Add tag
 
-- Add logging
-
 - Top 10 tags/articles using redis
 
 - Add images in aricle
-
-- Use separate binaries for account, article and comment service
 
 - Service discovery with load balancing
 
