@@ -16,6 +16,7 @@ var (
 
 type Service interface {
 	Get(ctx context.Context, username string) (account model.Account, err error)
+	Get1(ctx context.Context, id string) (account model.Account, err error)
 	Add(ctx context.Context, name string, username string, password string) (err error)
 	Update(ctx context.Context, username string, name string) (err error)
 	List(ctx context.Context) (account []model.Account, err error)
@@ -37,6 +38,14 @@ func (s *service) Get(ctx context.Context, username string) (account model.Accou
 		return
 	}
 	return s.accountRepo.Get1(username)
+}
+
+func (s *service) Get1(ctx context.Context, id string) (account model.Account, err error) {
+	if len(id) < 1 {
+		err = errInvalidArgument
+		return
+	}
+	return s.accountRepo.Get(id)
 }
 
 func (s *service) Add(ctx context.Context, name string, username string, password string) (err error) {

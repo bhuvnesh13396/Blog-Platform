@@ -11,13 +11,13 @@ import (
 
 var (
 	authtoken = "FTZDRJdnGzOvbirfJNp2LsVt"
-	blogAddr  = "http://localhost:8080"
+	articleAddr  = "http://localhost:8081"
 	ctx       = context.Background()
 )
 
 func main() {
 	ctx = context.WithValue(ctx, token.ContextKey, authtoken)
-	articleSvc, err := client.New(blogAddr, http.DefaultClient)
+	articleSvc, err := client.New(articleAddr, http.DefaultClient)
 	if err != nil {
 		panic(err)
 	}

@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"sample/account"
+	"sample/common/auth/token"
 	"sample/common/kit"
 )
 
@@ -14,11 +15,25 @@ func New(instance string, client *http.Client) (account.Service, error) {
 		return nil, err
 	}
 
+	opts := []kit.ClientOption{
+		kit.SetClient(client),
+		kit.ClientBefore(token.HTTPTokenFromContext),
+	}
+
 	getEndpoint := kit.NewClient(
 		http.MethodGet,
 		copyURL(u, "/account"),
 		kit.EncodeSchemaRequest,
 		account.DecodeGetResponse,
+		opts...,
+	).Endpoint()
+
+	get1Endpoint := kit.NewClient(
+		http.MethodGet,
+		copyURL(u, "/account/1"),
+		kit.EncodeSchemaRequest,
+		account.DecodeGet1Response,
+		opts...,
 	).Endpoint()
 
 	addEndPoint := kit.NewClient(
@@ -26,6 +41,7 @@ func New(instance string, client *http.Client) (account.Service, error) {
 		copyURL(u, "/account"),
 		kit.EncodeJSONRequest,
 		account.DecodeAddResponse,
+		opts...,
 	).Endpoint()
 
 	updateEndpoint := kit.NewClient(
@@ -33,6 +49,7 @@ func New(instance string, client *http.Client) (account.Service, error) {
 		copyURL(u, "/account"),
 		kit.EncodeJSONRequest,
 		account.DecodeUpdateResponse,
+		opts...,
 	).Endpoint()
 
 	listEndpoint := kit.NewClient(
@@ -40,10 +57,12 @@ func New(instance string, client *http.Client) (account.Service, error) {
 		copyURL(u, "/account/all"),
 		kit.EncodeSchemaRequest,
 		account.DecodeListResponse,
+		opts...,
 	).Endpoint()
 
 	return &account.Endpoint{
 		GetEndpoint:    account.GetEndpoint(getEndpoint),
+		Get1Endpoint:   account.Get1Endpoint(get1Endpoint),
 		AddEndpoint:    account.AddEndpoint(addEndPoint),
 		UpdateEndpoint: account.UpdateEndpoint(updateEndpoint),
 		ListEndpoint:   account.ListEndpoint(listEndpoint),

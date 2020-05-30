@@ -3,6 +3,7 @@ package article
 import (
 	"context"
 
+	"sample/account"
 	"sample/common/err"
 	"sample/common/id"
 	"sample/model"
@@ -21,13 +22,13 @@ type Service interface {
 
 type service struct {
 	articleRepo model.ArticleRepo
-	accountRepo model.AccountRepo
+	accountSvc  account.Service
 }
 
-func NewService(articleRepo model.ArticleRepo, accountRepo model.AccountRepo) Service {
+func NewService(articleRepo model.ArticleRepo, accountSvc account.Service) Service {
 	return &service{
 		articleRepo: articleRepo,
-		accountRepo: accountRepo,
+		accountSvc:  accountSvc,
 	}
 }
 
@@ -42,7 +43,7 @@ func (s *service) Get(ctx context.Context, id string) (article GetRes, err error
 		return
 	}
 
-	u, err := s.accountRepo.Get(a.UserID)
+	u, err := s.accountSvc.Get1(ctx, a.UserID)
 	if err != nil {
 		return
 	}
@@ -51,10 +52,10 @@ func (s *service) Get(ctx context.Context, id string) (article GetRes, err error
 		ID:          a.ID,
 		Title:       a.Title,
 		Description: a.Description,
-		User:        User{
-			ID: u.ID,
+		User: User{
+			ID:       u.ID,
 			Username: u.Username,
-			Name: u.Name,
+			Name:     u.Name,
 		},
 	}
 
@@ -98,7 +99,7 @@ func (s *service) List(ctx context.Context) (res []GetRes, err error) {
 
 	for i := range articles {
 		a := &articles[i]
-		u, err := s.accountRepo.Get(a.UserID)
+		u, err := s.accountSvc.Get1(ctx, a.UserID)
 		if err != nil {
 			return []GetRes{}, err
 		}
@@ -107,10 +108,10 @@ func (s *service) List(ctx context.Context) (res []GetRes, err error) {
 			ID:          a.ID,
 			Title:       a.Title,
 			Description: a.Description,
-			User:        User{
-				ID: u.ID,
+			User: User{
+				ID:       u.ID,
 				Username: u.Username,
-				Name: u.Name,
+				Name:     u.Name,
 			},
 		}
 
