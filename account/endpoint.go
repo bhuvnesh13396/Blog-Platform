@@ -7,12 +7,14 @@ import (
 )
 
 type GetEndpoint kit.Endpoint
+type Get1Endpoint kit.Endpoint
 type AddEndpoint kit.Endpoint
 type UpdateEndpoint kit.Endpoint
 type ListEndpoint kit.Endpoint
 
 type Endpoint struct {
 	GetEndpoint
+	Get1Endpoint
 	AddEndpoint
 	UpdateEndpoint
 	ListEndpoint
@@ -42,6 +44,32 @@ func (e GetEndpoint) Get(ctx context.Context, username string) (account model.Ac
 	resp := response.(getResponse)
 	return resp.Account, err
 }
+
+type get1Request struct {
+	ID string `schema:"id"`
+}
+
+type get1Response struct {
+	Account model.Account `json:"account"`
+}
+
+func MakeGet1Endpoint(s Service) kit.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(get1Request)
+		account, err := s.Get1(ctx, req.ID)
+		return get1Response{Account: account}, err
+	}
+}
+
+func (e Get1Endpoint) Get1(ctx context.Context, id string) (account model.Account, err error) {
+	request := get1Request{
+		ID: id,
+	}
+	response, err := e(ctx, request)
+	resp := response.(get1Response)
+	return resp.Account, err
+}
+
 
 type addRequest struct {
 	Name     string `json:"name"`

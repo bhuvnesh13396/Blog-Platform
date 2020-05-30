@@ -30,6 +30,13 @@ func NewHandler(s Service) http.Handler {
 		opts...,
 	)
 
+	get1 := kit.NewServer(
+		MakeGet1Endpoint(s),
+		DecodeGet1Request,
+		kit.EncodeJSONResponse,
+		opts...,
+	)
+
 	add := kit.NewServer(
 		MakeAddEndpoint(s),
 		DecodeAddRequest,
@@ -52,6 +59,7 @@ func NewHandler(s Service) http.Handler {
 	)
 
 	r.Handle("/account", get).Methods(http.MethodGet)
+	r.Handle("/account/1", get1).Methods(http.MethodGet)
 	r.Handle("/account", add).Methods(http.MethodPost)
 	r.Handle("/account", update).Methods(http.MethodPut)
 	r.Handle("/account/all", list).Methods(http.MethodGet)
@@ -67,6 +75,18 @@ func DecodeGetRequest(ctx context.Context, r *http.Request) (interface{}, error)
 
 func DecodeGetResponse(ctx context.Context, r *http.Response) (interface{}, error) {
 	var resp getResponse
+	err := kit.DecodeResponse(ctx, r, &resp)
+	return resp, err
+}
+
+func DecodeGet1Request(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req get1Request
+	err := schema.NewDecoder().Decode(&req, r.URL.Query())
+	return req, err
+}
+
+func DecodeGet1Response(ctx context.Context, r *http.Response) (interface{}, error) {
+	var resp get1Response
 	err := kit.DecodeResponse(ctx, r, &resp)
 	return resp, err
 }

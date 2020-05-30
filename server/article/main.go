@@ -9,13 +9,17 @@ import (
 	"os"
 	"time"
 
-	"sample/account"
+	"sample/account/client"
+	"sample/article"
 	"sample/auth"
-	"sample/comment"
+	"sample/common/kit"
 	"sample/repo/psql"
-	"sample/tag"
 
 	_ "github.com/lib/pq"
+)
+
+var (
+	accountSvcAddr = "http://localhost:8080"
 )
 
 func init() {
@@ -34,6 +38,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	logger := kit.NewJSONLogger(os.Stdout)
+
 	accountRepo, err := psql.NewAccountRepo(db)
 	if err != nil {
 		log.Fatal(err)
@@ -49,42 +55,28 @@ func main() {
 		log.Fatal(err)
 	}
 
-	commentRepo, err := psql.NewCommentRepo(db)
+	accountSvc, err := client.New(accountSvcAddr, http.DefaultClient)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	tagRepo, err := psql.NewTagRepo(db)
-	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	authService := auth.NewService(sessionRepo, accountRepo)
 	authHandler := auth.NewHandler(authService)
 
-	accountService := account.NewService(accountRepo)
-	accountService = account.NewAuthService(accountService, authService)
-	accountHandler := account.NewHandler(accountService)
-
-	commentService := comment.NewService(commentRepo, articleRepo, accountRepo)
-	commentHandler := comment.NewHandler(commentService)
-
-	tagService := tag.NewService(tagRepo)
-	tagHandler := tag.NewHandler(tagService)
+	articleService := article.NewService(articleRepo, accountSvc)
+	articleService = article.NewLogService(articleService, kit.LoggerWith(logger, "service", "Article"))
+	articleService = article.NewAuthService(articleService, authService)
+	articleHandler := article.NewHandler(articleService)
 
 	r := http.NewServeMux()
 
 	r.Handle("/auth", authHandler)
 	r.Handle("/auth/", authHandler)
-	r.Handle("/account", accountHandler)
-	r.Handle("/account/", accountHandler)
-	r.Handle("/comment", commentHandler)
-	r.Handle("/comment/", commentHandler)
-	r.Handle("/tag", tagHandler)
-	r.Handle("/tag/", tagHandler)
+	r.Handle("/article", articleHandler)
+	r.Handle("/article/", articleHandler)
 
-	log.Println("listening on", ":8080")
-	err = http.ListenAndServe(":8080", r)
+	log.Println("listening on", ":8081")
+	err = http.ListenAndServe(":8081", r)
 	if err != nil {
 		errExit(err)
 	}

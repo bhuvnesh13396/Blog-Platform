@@ -43,6 +43,15 @@ func (s *authSvc) Get(ctx context.Context, username string) (account model.Accou
 	return s.Service.Get(ctx, username)
 }
 
+func (s *authSvc) Get1(ctx context.Context, id string) (account model.Account, err error) {
+	_, err = s.verifyToken(ctx)
+	if err != nil {
+		return
+	}
+
+	return s.Service.Get1(ctx, id)
+}
+
 func (s *authSvc) Add(ctx context.Context, name string, username string, password string) (err error) {
 	_, err = s.verifyToken(ctx)
 	if err != nil {
