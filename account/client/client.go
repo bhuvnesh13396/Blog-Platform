@@ -14,11 +14,17 @@ func New(instance string, client *http.Client) (account.Service, error) {
 		return nil, err
 	}
 
+	opts := []kit.ClientOption {
+		kit.SetClient(client),
+		kit.ClientBefore(token.HTTPTokenFromContext),
+        }
+
 	getEndpoint := kit.NewClient(
 		http.MethodGet,
 		copyURL(u, "/account"),
 		kit.EncodeSchemaRequest,
 		account.DecodeGetResponse,
+		opts...,
 	).Endpoint()
 
 	addEndPoint := kit.NewClient(
@@ -26,6 +32,7 @@ func New(instance string, client *http.Client) (account.Service, error) {
 		copyURL(u, "/account"),
 		kit.EncodeJSONRequest,
 		account.DecodeAddResponse,
+		opts...,
 	).Endpoint()
 
 	updateEndpoint := kit.NewClient(
@@ -33,6 +40,7 @@ func New(instance string, client *http.Client) (account.Service, error) {
 		copyURL(u, "/account"),
 		kit.EncodeJSONRequest,
 		account.DecodeUpdateResponse,
+		opts...,
 	).Endpoint()
 
 	listEndpoint := kit.NewClient(
@@ -40,6 +48,7 @@ func New(instance string, client *http.Client) (account.Service, error) {
 		copyURL(u, "/account/all"),
 		kit.EncodeSchemaRequest,
 		account.DecodeListResponse,
+		opts...,
 	).Endpoint()
 
 	return &account.Endpoint{

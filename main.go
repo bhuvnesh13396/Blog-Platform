@@ -67,6 +67,7 @@ func main() {
 	authHandler := auth.NewHandler(authService)
 
 	accountService := account.NewService(accountRepo)
+	accountService = account.NewAuthService(accountService, authService)
 	accountHandler := account.NewHandler(accountService)
 
 	articleService := article.NewService(articleRepo, accountRepo)
