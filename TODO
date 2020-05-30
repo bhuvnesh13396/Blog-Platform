@@ -15,8 +15,12 @@
 
 - Top 10 tags/articles using redis
 
+- Add images in aricle
+
 - Use separate binaries for account, article and comment service
 
 - Service discovery with load balancing
+
+- Search
 
 - Use case for Go routines
