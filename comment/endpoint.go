@@ -23,7 +23,7 @@ type addRequest struct {
 	UserID      string    `schema:"user_id"`
 	ArticleID   string    `schema:"article_id"`
 	Text        string    `schema:"text"`
-	createdDate time.Time `schema:"created_date"`
+	CreatedDate time.Time `schema:"created_date"`
 }
 
 type addResponse struct {
@@ -37,7 +37,7 @@ func MakeAddEndpoint(s Service) kit.Endpoint {
 	}
 }
 
-func (e Endpoint) Add(ctx contect.Context, id, userID, articleID, text string, create_date time.Time) {
+func (e AddEndpoint) Add(ctx context.Context, id, userID, articleID, text string, create_date time.Time) (err error) {
 	request := addRequest{
 		ID:          id,
 		UserID:      userID,

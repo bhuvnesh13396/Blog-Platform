@@ -14,11 +14,17 @@ func New(instance string, client *http.Client) (comment.Service, error) {
 		return nil, err
 	}
 
+	opts := []kit.ClientOption{
+		kit.SetClient(client),
+		kit.ClientBefore(token.HTTPTokenFromContext)
+	}
+
 	getUserCommentEndpoint := kit.NewClient(
 		http.MethodGet,
 		copyURL(u, "/comment/{user_id}"),
 		kit.EncodeSchemaRequest,
 		comment.DecodeGetUserCommentResponse,
+		opts...,
 	).Endpoint()
 
 	getArticleCommentEndpoint := kit.NewClient(
@@ -26,6 +32,7 @@ func New(instance string, client *http.Client) (comment.Service, error) {
 		copyURL(u, "/comment/{article_id}"),
 		kit.EncodeSchemaRequest,
 		comment.DecodeGetArticleCommentResponse,
+		opts...,
 	).Endpoint()
 
 	updateEndpoint := kit.NewClient(
@@ -33,6 +40,7 @@ func New(instance string, client *http.Client) (comment.Service, error) {
 		copuURL(u, "/article"),
 		kit.EncodeJSONRequest,
 		comment.DecodeUpdateResponse,
+		opts...,
 	).Endpoint()
 
 	addEndpoint := kit.NewClient(
@@ -40,6 +48,7 @@ func New(instance string, client *http.Client) (comment.Service, error) {
 		copyURL(u, "/comment/{id}"),
 		kit.EncodeJSONRequest,
 		comment.DecodeAddResponse,
+		opts...,
 	).Endpoint()
 
 	return &article.Endpoint{

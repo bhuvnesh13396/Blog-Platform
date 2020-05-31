@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"sample/common/auth/token"
 	"sample/common/kit"
 
 	"github.com/gorilla/mux"
@@ -16,29 +17,35 @@ var (
 
 func NewHandler(s Service) http.Handler {
 	r := mux.NewRouter()
-
+	opts := []kit.ServerOption{
+		kit.ServerBefore(token.HTTPTokenFromContext),
+	}
 	getUserComment := kit.NewServer(
 		MakeGetUserCommentEndpoint(s),
 		DecodeGetUserCommentRequest,
 		kit.EncodeJSONResponse,
+		opts...,
 	)
 
 	getArticleComment := kit.NewServer(
 		MakeGetArticleCommentEndpoint(s),
 		DecodeGetArticleCommentRequest,
 		kit.EncodeJSONResponse,
+		opts...,
 	)
 
 	add := kit.NewServer(
 		MakeAddEndpoint(s),
 		DecodeAddRequest,
 		kit.EncodeJSONResponse,
+		opts...,
 	)
 
 	update := kit.NewServer(
 		MakeUpdateEndpoint(s),
 		DecodeUpdateRequest,
 		kit.EncodeJSONResponse,
+		opts...,
 	)
 
 	r.Handle("/comment/{user_id}", getUserComment).Methods(http.MethodGet)
@@ -51,25 +58,25 @@ func NewHandler(s Service) http.Handler {
 }
 
 func DecodeGetUserCommentRequest(ctx context.Context, r *http.Request) (interface{}, error) {
-	var req getRequest
+	var req getUserCommentRequest
 	err := schema.NewDecoder().Decode(&req, r.URL.Query())
 	return req, err
 }
 
 func DecodeGetUserCommentResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var resp getResponse
+	var resp getUserCommentResponse
 	err := kit.DecodeResponse(ctx, r, &resp)
 	return resp, err
 }
 
 func DecodeGetArticleCommentRequest(ctx context.Context, r *http.Request) (interface{}, error) {
-	var req getRequest
+	var req getArticleCommentRequest
 	err := schema.NewDecoder().Decode(&req, r.URL.Query())
 	return req, err
 }
 
 func DecodeGetArticleCommentResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var resp getResponse
+	var resp getArticleCommentResponse
 	err := kit.DecodeResponse(ctx, r, &resp)
 	return resp, err
 }

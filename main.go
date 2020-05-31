@@ -67,6 +67,7 @@ func main() {
 	accountHandler := account.NewHandler(accountService)
 
 	commentService := comment.NewService(commentRepo, articleRepo, accountRepo)
+	commentService = comment.NewAuthService(commentService, authService)
 	commentHandler := comment.NewHandler(commentService)
 
 	tagService := tag.NewService(tagRepo)
