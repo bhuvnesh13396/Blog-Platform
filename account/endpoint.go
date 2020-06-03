@@ -70,7 +70,6 @@ func (e Get1Endpoint) Get1(ctx context.Context, id string) (account model.Accoun
 	return resp.Account, err
 }
 
-
 type addRequest struct {
 	Name     string `json:"name"`
 	Username string `json:"username"`
