@@ -70,7 +70,7 @@ func main() {
 	commentService = comment.NewAuthService(commentService, authService)
 	commentHandler := comment.NewHandler(commentService)
 
-	tagService := tag.NewService(tagRepo)
+	tagService := tag.NewService(tagRepo, articleRepo)
 	tagHandler := tag.NewHandler(tagService)
 
 	r := http.NewServeMux()
