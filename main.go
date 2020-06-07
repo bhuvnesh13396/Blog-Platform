@@ -12,6 +12,7 @@ import (
 	"sample/account"
 	"sample/auth"
 	"sample/comment"
+	"sample/common/kit"
 	"sample/repo/psql"
 	"sample/tag"
 
@@ -33,6 +34,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	logger := kit.NewJSONLogger(os.Stdout)
 
 	accountRepo, err := psql.NewAccountRepo(db)
 	if err != nil {
@@ -63,14 +66,18 @@ func main() {
 	authHandler := auth.NewHandler(authService)
 
 	accountService := account.NewService(accountRepo)
+	accountService = account.NewLogService(accountService, kit.LoggerWith(logger, "service", "Account"))
 	accountService = account.NewAuthService(accountService, authService)
 	accountHandler := account.NewHandler(accountService)
 
 	commentService := comment.NewService(commentRepo, articleRepo, accountRepo)
+	commentService = comment.NewLogService(commentService, kit.LoggerWith(logger, "service", "Comment"))
 	commentService = comment.NewAuthService(commentService, authService)
 	commentHandler := comment.NewHandler(commentService)
 
 	tagService := tag.NewService(tagRepo, articleRepo)
+	tagService = tag.NewLogService(tagService, kit.LoggerWith(logger, "service", "Tag"))
+	tagService = tag.NewAuthService(tagService, authService)
 	tagHandler := tag.NewHandler(tagService)
 
 	r := http.NewServeMux()

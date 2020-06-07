@@ -57,11 +57,11 @@ func NewHandler(s Service) http.Handler {
 		opts...,
 	)
 
-	r.Handle("/tag/{article_id}", getArticle).Methods(http.MethodGet)
-	r.Handle("/tag/{tag_id}", getTagsOnArticle).Methods(http.MethodGet)
-	r.Handle("/tag/{tag_id}", removeFromArticle).Methods(http.MethodDelete)
+	r.Handle("/tag/allArticles", getArticle).Methods(http.MethodGet)
+	r.Handle("/tag/onArticle", getTagsOnArticle).Methods(http.MethodGet)
+	r.Handle("/tag/removeFromArticle", removeFromArticle).Methods(http.MethodDelete)
 	r.Handle("/tag", add).Methods(http.MethodPut)
-	r.Handle("/tagToArticle", addToArticle).Methods(http.MethodPut)
+	r.Handle("/tag/addToArticle", addToArticle).Methods(http.MethodPut)
 
 	return r
 }

@@ -22,7 +22,7 @@ func New(instance string, client *http.Client) (tag.Service, error){
 
 	addEndpoint := kit.NewClient(
 		http.MethodPost,
-		copyURL(u, "/tag/add")
+		copyURL(u, "/tag")
 		kit.EncodeJSONRequest,
 		tag.DecodeAddResponse,
 		opts...,
